@@ -221,10 +221,14 @@
   function init(){
     var input = document.getElementById('document');
     var form = document.getElementById('second-copy-form');
-    var msg = document.getElementById('message');
-    if(!input || !form || !msg) return;
-    function showMsg(text){ msg.textContent = text; msg.style.cssText = 'margin:8px 0 0;color:#d93025;font-size:13px;font-weight:600'; }
-    function clearMsg(){ msg.textContent=''; msg.style.cssText=''; }
+    if(!input || !form) return;
+    var field = input.closest('.field') || input.parentNode;
+    var msg = document.createElement('p');
+    msg.id = 'document-error';
+    msg.style.cssText = 'display:none';
+    field.parentNode.insertBefore(msg, field.nextSibling);
+    function showMsg(text){ msg.textContent = text; msg.style.cssText = 'display:block;margin:6px 0 0;color:#d93025;font-size:13px;font-weight:600'; }
+    function clearMsg(){ msg.textContent=''; msg.style.cssText='display:none'; }
     function check(digits){
       if(digits.length <= 11) return validCPF(digits);
       return validCNPJ(digits);
