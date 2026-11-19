@@ -226,7 +226,7 @@
     var msg = document.createElement('p');
     msg.id = 'document-error';
     msg.style.cssText = 'display:none';
-    field.parentNode.insertBefore(msg, field.nextSibling);
+    field.appendChild(msg);
     function showMsg(text){ msg.textContent = text; msg.style.cssText = 'display:block;margin:6px 0 0;color:#d93025;font-size:13px;font-weight:600'; }
     function clearMsg(){ msg.textContent=''; msg.style.cssText='display:none'; }
     function check(digits){
