@@ -233,6 +233,25 @@
       if(digits.length <= 11) return validCPF(digits);
       return validCNPJ(digits);
     }
+    var btn = form.querySelector('.continue');
+    var clientCode = document.getElementById('client-code');
+    function cityFilled(id){ var el = document.getElementById(id); return !!(el && el.value.trim().length); }
+    function formValid(){
+      if(form.getAttribute('data-mode') === 'cdc'){
+        return !!(clientCode && onlyDigits(clientCode.value).length) && cityFilled('city-search-cdc');
+      }
+      return check(onlyDigits(input.value)) && cityFilled('city-search');
+    }
+    function updateButton(){
+      if(!btn) return;
+      var ok = formValid();
+      btn.disabled = !ok;
+      btn.style.opacity = ok ? '' : '0.45';
+      btn.style.cursor = ok ? '' : 'not-allowed';
+    }
+    document.addEventListener('input', updateButton);
+    document.addEventListener('click', function(){ setTimeout(updateButton, 30); });
+    updateButton();
     input.addEventListener('input', function(){
       input.value = maskDoc(input.value);
       var d = onlyDigits(input.value);
