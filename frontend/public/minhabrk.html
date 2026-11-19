@@ -173,3 +173,89 @@
   if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', init); } else { init(); }
 })();
 </script>
+<script>
+(function(){
+  function onlyDigits(s){ return (s||'').replace(/\D/g,''); }
+  function maskDoc(v){
+    var d = onlyDigits(v).slice(0,14);
+    if(d.length <= 11){
+      return d
+        .replace(/^(\d{3})(\d)/,'$1.$2')
+        .replace(/^(\d{3})\.(\d{3})(\d)/,'$1.$2.$3')
+        .replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/,'$1.$2.$3-$4');
+    }
+    return d
+      .replace(/^(\d{2})(\d)/,'$1.$2')
+      .replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3')
+      .replace(/^(\d{2})\.(\d{3})\.(\d{3})(\d)/,'$1.$2.$3/$4')
+      .replace(/^(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d)/,'$1.$2.$3/$4-$5');
+  }
+  function validCPF(cpf){
+    cpf = onlyDigits(cpf);
+    if(cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+    var sum=0, i;
+    for(i=0;i<9;i++) sum += parseInt(cpf[i],10)*(10-i);
+    var d1 = (sum*10)%11; if(d1===10) d1=0;
+    if(d1 !== parseInt(cpf[9],10)) return false;
+    sum=0;
+    for(i=0;i<10;i++) sum += parseInt(cpf[i],10)*(11-i);
+    var d2 = (sum*10)%11; if(d2===10) d2=0;
+    return d2 === parseInt(cpf[10],10);
+  }
+  function validCNPJ(cnpj){
+    cnpj = onlyDigits(cnpj);
+    if(cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) return false;
+    function calc(len){
+      var nums = cnpj.substring(0,len);
+      var pos = len-7, sum=0, i;
+      for(i=len;i>=1;i--){
+        sum += parseInt(nums[len-i],10)*pos--;
+        if(pos<2) pos=9;
+      }
+      var r = sum%11;
+      return r<2 ? 0 : 11-r;
+    }
+    if(calc(12) !== parseInt(cnpj[12],10)) return false;
+    return calc(13) === parseInt(cnpj[13],10);
+  }
+  function init(){
+    var input = document.getElementById('document');
+    var form = document.getElementById('second-copy-form');
+    var msg = document.getElementById('message');
+    if(!input || !form || !msg) return;
+    function showMsg(text){ msg.textContent = text; msg.style.cssText = 'margin:8px 0 0;color:#d93025;font-size:13px;font-weight:600'; }
+    function clearMsg(){ msg.textContent=''; msg.style.cssText=''; }
+    function check(digits){
+      if(digits.length <= 11) return validCPF(digits);
+      return validCNPJ(digits);
+    }
+    input.addEventListener('input', function(){
+      input.value = maskDoc(input.value);
+      var d = onlyDigits(input.value);
+      if(d.length === 11 || d.length === 14){
+        if(check(d)) clearMsg();
+        else showMsg(d.length === 11 ? 'CPF inválido. Verifique os números digitados.' : 'CNPJ inválido. Verifique os números digitados.');
+      } else {
+        clearMsg();
+      }
+    });
+    form.addEventListener('submit', function(e){
+      if(form.getAttribute('data-mode') === 'cdc') return;
+      var d = onlyDigits(input.value);
+      if(d.length !== 11 && d.length !== 14){
+        e.preventDefault();
+        showMsg('Informe um CPF (11 dígitos) ou CNPJ (14 dígitos) válido.');
+        input.focus();
+        return;
+      }
+      if(!check(d)){
+        e.preventDefault();
+        showMsg(d.length === 11 ? 'CPF inválido. Verifique os números digitados.' : 'CNPJ inválido. Verifique os números digitados.');
+        input.focus();
+      }
+    });
+  }
+  if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', init); } else { init(); }
+})();
+</script>
+
